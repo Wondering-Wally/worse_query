@@ -53,3 +53,19 @@ ideviceinstaller -i worse_query-unsigned.ipa
 ```
 
 `entitlements.plist` here just needs `com.apple.security.application-groups` containing *your* group ID — the app picks it up at runtime.
+
+### Enabling Developer Mode (CLI)
+
+```bash
+# Reveal the toggle in Settings (one-time, before it shows up):
+idevicedevmodectl reveal
+
+# Check status:
+idevicedevmodectl list
+
+# Enable remotely — only works with NO passcode set:
+idevicedevmodectl enable
+
+# With a passcode, do it on the device instead:
+# Settings → Privacy & Security → Developer Mode → reboot → tap "Turn On"
+```
