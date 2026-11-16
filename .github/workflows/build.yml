@@ -1,0 +1,38 @@
+name: Build
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select latest Xcode
+        run: |
+          # The project requires Xcode 27+ (objectVersion 110)
+          sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)/Contents/Developer"
+          xcodebuild -version
+
+      - name: Build unsigned app
+        run: |
+          xcodebuild -project worse_query.xcodeproj \
+            -scheme worse_query \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Package unsigned .app
+        run: |
+          mkdir -p out/Payload
+          cp -R "build/Build/Products/Release-iphoneos/worse_query.app" out/Payload/
+          cd out && zip -r worse_query-unsigned.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: worse_query-unsigned
+          path: out/worse_query-unsigned.ipa

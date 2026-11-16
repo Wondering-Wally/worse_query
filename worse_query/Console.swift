@@ -16,6 +16,9 @@ class Console: ObservableObject {
     private var originalOut: Int32 = 0
     
     func start() {
+        if pipe != nil {
+            return // Already redirected
+        }
         // Make a new pipe
         let newPipe = Pipe()
         pipe = newPipe

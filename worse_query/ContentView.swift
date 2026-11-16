@@ -9,10 +9,28 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var console = Console()
+    @StateObject private var store = ExtensionStore()
     @State private var sandboxHandle: Int64?
     @State private var path = "/private/var/mobile/Containers/Shared/AppGroup/"
-    
+
     var body: some View {
+        TabView {
+            BrowserView()
+                .environmentObject(store)
+                .tabItem {
+                    Label("Browser", systemImage: "folder")
+                }
+            toolsView
+                .tabItem {
+                    Label("Tools", systemImage: "wrench.and.screwdriver")
+                }
+        }
+        .onAppear() {
+            console.start()
+        }
+    }
+
+    var toolsView: some View {
         NavigationStack {
             Form {
                 Section("Target Path") {
@@ -80,9 +98,6 @@ struct ContentView: View {
             }
             .navigationTitle("worse_query")
             .navigationBarTitleDisplayMode(.inline)
-            .onAppear() {
-                console.start()
-            }
         }
     }
     
@@ -178,28 +193,11 @@ struct ContentView: View {
         
         var handle: Int64 = -255
         if path.contains("/var/mobile/Containers/Shared/AppGroup") && ProcessInfo.processInfo.operatingSystemVersion.majorVersion == 26 {
-            handle = worse_query(path, "group.cc.forcequit.worse-query", true, false)
+            handle = worse_query(path, ExtensionStore.groupID, true, false)
         } else {
-            handle = worse_query(path, "group.cc.forcequit.worse-query", false, false)
+            handle = worse_query(path, ExtensionStore.groupID, false, false)
         }
-        switch handle {
-        case -1:
-            print("failed to access group!")
-        case -2:
-            print("failed to resolve functions!")
-        case -3:
-            print("failed to create query!")
-        case -4:
-            print("failed to create symlink!")
-        case -5:
-            print("query rejected!")
-        case -6:
-            print("kernel refused extension issue!")
-        case -255:
-            print("target doesn't exist!")
-        default:
-            print("handle: \(handle)")
-        }
+        print(ExtensionStore.describe(handle))
         return handle
     }
 
